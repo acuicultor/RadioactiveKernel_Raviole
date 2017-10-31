@@ -81,7 +81,8 @@ static void pm_qos_set_value(struct pm_qos_constraints *c, s32 value)
 	WRITE_ONCE(c->target_value, value);
 }
 
-static inline void pm_qos_set_value_for_cpus(struct pm_qos_constraints *c)
+static inline void pm_qos_set_value_for_cpus(struct pm_qos_constraints *c,
+		struct cpumask *cpus)
 {
 	struct pm_qos_request *req = NULL;
 	int cpu;
@@ -104,8 +105,11 @@ static inline void pm_qos_set_value_for_cpus(struct pm_qos_constraints *c)
 		}
 	}
 
-	for_each_possible_cpu(cpu)
+	for_each_possible_cpu(cpu) {
+		if (c->target_per_cpu[cpu] != qos_val[cpu])
+			cpumask_set_cpu(cpu, cpus);
 		c->target_per_cpu[cpu] = qos_val[cpu];
+	}
 }
 
 /**
@@ -129,6 +133,7 @@ int pm_qos_update_target(struct pm_qos_constraints *c, struct plist_node *node,
 			 enum pm_qos_req_action action, int value)
 {
 	int prev_value, curr_value, new_value;
+	struct cpumask cpus;
 	unsigned long flags;
 
 	spin_lock_irqsave(&pm_qos_lock, flags);
@@ -160,18 +165,19 @@ int pm_qos_update_target(struct pm_qos_constraints *c, struct plist_node *node,
 	}
 
 	curr_value = pm_qos_get_value(c);
+	cpumask_clear(&cpus);
 	pm_qos_set_value(c, curr_value);
-	pm_qos_set_value_for_cpus(c);
+	pm_qos_set_value_for_cpus(c, &cpus);
 
 	spin_unlock_irqrestore(&pm_qos_lock, flags);
 
 	trace_pm_qos_update_target(action, prev_value, curr_value);
 
-	if (prev_value == curr_value)
+	if (cpumask_empty(&cpus))
 		return 0;
 
 	if (c->notifiers)
-		blocking_notifier_call_chain(c->notifiers, curr_value, NULL);
+		blocking_notifier_call_chain(c->notifiers, curr_value, &cpus);
 
 	return 1;
 }
