@@ -1012,6 +1012,9 @@ static int exynos_pm_qos_power_init(void)
 
 	BUILD_BUG_ON(ARRAY_SIZE(exynos_pm_qos_array) != EXYNOS_PM_QOS_NUM_CLASSES);
 
+	/* Don't let userspace impose restrictions on CPU idle levels */
+	return 0;
+
 	d = debugfs_create_dir("exynos_pm_qos", NULL);
 
 	for (i = PM_QOS_CLUSTER0_FREQ_MIN; i < EXYNOS_PM_QOS_NUM_CLASSES; i++) {
