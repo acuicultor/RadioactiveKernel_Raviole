@@ -50,6 +50,8 @@ obj-$(CONFIG_HARDLOCKUP_WATCHDOG)	+= hardlockup-watchdog.o
 # vh/kernel/sched
 obj-$(CONFIG_VH_KERNEL)			+= vh/kernel/
 
+obj-$(CONFIG_PIXEL_EM)			+= pixel_em/
+
 obj-$(CONFIG_PIXEL_STAT)		+= pixel_stat/
 
 obj-$(CONFIG_DBGCORE_DUMP)		+= dbgcore-dump.o
