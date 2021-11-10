@@ -2,7 +2,7 @@
 # Radioactive extra stuff
 #
 CONFIG_LOCALVERSION="-Radioactive_V1.0.0"
-
+CONFIG_BOEFFLA_WL_BLOCKER=y
 
 
 
