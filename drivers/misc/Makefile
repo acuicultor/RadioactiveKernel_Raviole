@@ -71,3 +71,4 @@ obj-$(CONFIG_UCI)  += uci/
 obj-$(CONFIG_UCI_NOTIFICATIONS)  += notification/
 obj-y  += inputfilter/
 
+obj-$(CONFIG_FORCE_FAST_CHARGE) += fastchg.o
