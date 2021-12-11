@@ -520,7 +520,7 @@ int g2d_create_tasks(struct g2d_device *g2d_dev)
 {
 	struct sched_param param[] = {
 		{.sched_priority =  MAX_RT_PRIO / 4 - 1 },
-		{.sched_priority =  MAX_RT_PRIO / 2 }
+		{.sched_priority =  MAX_RT_PRIO / 4 }
 	};
 	struct g2d_task *task;
 	unsigned int i;
