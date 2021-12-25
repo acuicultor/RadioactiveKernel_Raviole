@@ -315,6 +315,18 @@ static ssize_t channel_temp_show(struct kobject *kobj,
 
 static struct kobj_attribute channel_temp_attr = __ATTR_RO(channel_temp);
 
+static ssize_t
+tz_temp_show(struct device *dev, struct device_attribute *attr, char *buf)
+{
+	struct thermal_zone_device *tzd = to_thermal_zone(dev);
+
+	thermal_zone_device_update(tzd, THERMAL_EVENT_UNSPECIFIED);
+
+	return sysfs_emit(buf, "%d\n", tzd->temperature);
+}
+
+static DEVICE_ATTR_RO(tz_temp);
+
 static int gs101_spmic_thermal_get_hot_temp(struct thermal_zone_device *tzd)
 {
 	int ntrips;
@@ -377,7 +389,7 @@ static int gs101_spmic_thermal_register_tzd(struct gs101_spmic_thermal_chip *gs1
 	struct thermal_zone_device *tzd;
 	struct device *dev = gs101_spmic_thermal->dev;
 	u8 mask = 0x1;
-	int temp;
+	int temp, ret;
 
 	for (i = 0; i < GTHERM_CHAN_NUM; i++, mask <<= 1) {
 		dev_info(dev, "Registering channel %d\n", i);
@@ -399,6 +411,13 @@ static int gs101_spmic_thermal_register_tzd(struct gs101_spmic_thermal_chip *gs1
 		gs101_spmic_thermal->kobjs[i] =
 			kobject_create_and_add("adc_channel", &tzd->device.kobj);
 		sysfs_create_file(gs101_spmic_thermal->kobjs[i], &channel_temp_attr.attr);
+
+		ret = device_create_file(&tzd->device, &dev_attr_tz_temp);
+		if (ret)
+			dev_err(dev,
+				"Error creating tz_temp node for thermal zone:%ld for channel:%d\n",
+				PTR_ERR(tzd), i);
+
 		temp = gs101_spmic_thermal_get_hot_temp(tzd);
 		gs101_spmic_thermal_set_hot_trip(&gs101_spmic_thermal->sensor[i], temp);
 	}
