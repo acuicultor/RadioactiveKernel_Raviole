@@ -898,7 +898,6 @@
   sprintf
   sscanf
   __stack_chk_fail
-  __stack_chk_guard
   strcasecmp
   strcat
   strcmp
