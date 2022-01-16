@@ -1928,7 +1928,6 @@
   __srcu_read_unlock
   sscanf
   __stack_chk_fail
-  __stack_chk_guard
   stack_trace_save
   static_key_disable_cpuslocked
   static_key_enable_cpuslocked
