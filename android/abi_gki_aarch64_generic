@@ -752,6 +752,7 @@
   flush_delayed_work
   flush_work
   flush_workqueue
+  fortify_panic
   fput
   frame_vector_create
   frame_vector_destroy
