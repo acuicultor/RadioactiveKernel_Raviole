@@ -1,11 +1,11 @@
 {
   "kernel": {
     "name": "Radioactive Kernel Raviole",
-    "version": "v1.0.6",
-    "link": "https://github.com/acuicultor/RadioactiveKernel_Raviole/releases/download/v1.0.6/RadioactiveKernel_RAVIOLE_v1.0.6.zip",
+    "version": "v1.1.0",
+    "link": "https://github.com/acuicultor/RadioactiveKernel_Raviole/releases/download/v1.1.0/RadioactiveKernel_RAVIOLE_v1.1.0.zip",
     "changelog_url": "https://raw.githubusercontent.com/acuicultor/RadioactiveKernel_Raviole/release/updater/changelog.txt",
-    "date": "2021-02-08",
-    "sha1": "9aa5ad7641cef8ed7458fd8d3cfc367404f0e691"
+    "date": "2021-03-23",
+    "sha1": "3ed6496f7586a727c03486e337d6ad2effd28a6d"
   },
   "support": {
     "link": "https://forum.xda-developers.com/t/kernel-radioactive-kernel-v1-0-4-2022-01-22-unified-pixel6-pixel6pro.4375933/"           
