@@ -71,6 +71,10 @@
 			google_wlc_fcc_charger: google,wlc_fcc_charger {
 				#cooling-cells = <2>;
 			};
+
+			google_mdis_charger: google,mdis_charger {
+				#cooling-cells = <2>;
+			};
 		};
 	};
 };
