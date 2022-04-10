@@ -651,7 +651,7 @@ EXPORT_SYMBOL_GPL(resched_curr);
 void resched_cpu(int cpu)
 {
 	struct rq *rq = cpu_rq(cpu);
-	unsigned long flags;
+	unsigned long flags __maybe_unused;
 
 	raw_spin_lock_irqsave(&rq->lock, flags);
 	if (cpu_online(cpu) || cpu == smp_processor_id())
@@ -3035,7 +3035,7 @@ static void ttwu_queue(struct task_struct *p, int cpu, int wake_flags)
 static int
 try_to_wake_up(struct task_struct *p, unsigned int state, int wake_flags)
 {
-	unsigned long flags;
+	unsigned long flags __maybe_unused;
 	int cpu, success = 0;
 
 	preempt_disable();
@@ -3521,7 +3521,7 @@ int sched_fork(unsigned long clone_flags, struct task_struct *p)
 
 void sched_cgroup_fork(struct task_struct *p, struct kernel_clone_args *kargs)
 {
-	unsigned long flags;
+	unsigned long flags __maybe_unused;
 
 	/*
 	 * Because we're not yet on the pid-hash, p->pi_lock isn't strictly
@@ -3913,7 +3913,7 @@ static void __balance_callback(struct rq *rq)
 {
 	struct callback_head *head, *next;
 	void (*func)(struct rq *rq);
-	unsigned long flags;
+	unsigned long flags __maybe_unused;
 
 	raw_spin_lock_irqsave(&rq->lock, flags);
 	head = rq->balance_callback;
@@ -4139,7 +4139,7 @@ unsigned long nr_iowait(void)
 void sched_exec(void)
 {
 	struct task_struct *p = current;
-	unsigned long flags;
+	unsigned long flags __maybe_unused;
 	int dest_cpu;
 	bool cond = false;
 
@@ -6278,7 +6278,7 @@ SYSCALL_DEFINE3(sched_setaffinity, pid_t, pid, unsigned int, len,
 long sched_getaffinity(pid_t pid, struct cpumask *mask)
 {
 	struct task_struct *p;
-	unsigned long flags;
+	unsigned long flags __maybe_unused;
 	int retval;
 
 	rcu_read_lock();
@@ -6461,7 +6461,7 @@ int __sched yield_to(struct task_struct *p, bool preempt)
 {
 	struct task_struct *curr = current;
 	struct rq *rq, *p_rq;
-	unsigned long flags;
+	unsigned long flags __maybe_unused;
 	int yielded = 0;
 
 	local_irq_save(flags);
@@ -6778,7 +6778,7 @@ void show_state_filter(unsigned long state_filter)
 void __init init_idle(struct task_struct *idle, int cpu)
 {
 	struct rq *rq = cpu_rq(cpu);
-	unsigned long flags;
+	unsigned long flags __maybe_unused;
 
 	__sched_fork(0, idle);
 
@@ -7855,7 +7855,7 @@ err:
 
 void sched_online_group(struct task_group *tg, struct task_group *parent)
 {
-	unsigned long flags;
+	unsigned long flags __maybe_unused;
 
 	spin_lock_irqsave(&task_group_lock, flags);
 	list_add_rcu(&tg->list, &task_groups);
@@ -7886,7 +7886,7 @@ void sched_destroy_group(struct task_group *tg)
 
 void sched_offline_group(struct task_group *tg)
 {
-	unsigned long flags;
+	unsigned long flags __maybe_unused;
 
 	/* End participation in shares distribution: */
 	unregister_fair_sched_group(tg);
