@@ -38,6 +38,7 @@
 				google,chg-power-supply = "gcpm";
 				google,bat-power-supply = "battery";
 				google,usb-power-supply = "usb";
+				google,tcpm-power-supply = <&max77759tcpc>;
 
 				google,fv-max-uv = <4450000>;
 
@@ -58,6 +59,8 @@
 				/* Enable TEMP-DEFEND */
 				google,bd-temp-enable;
 				google,bd-temp-dry-run;
+
+				google,chg-termination-5v;
 			};
 
 			google_bms {
