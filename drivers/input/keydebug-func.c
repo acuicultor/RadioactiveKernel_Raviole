@@ -46,11 +46,11 @@ static DEFINE_MUTEX(kernel_top_mutex);
 
 #ifdef arch_idle_time
 
-static u64 get_idle_time(int cpu)
+u64 get_idle_time(struct kernel_cpustat *kcs, int cpu)
 {
 	u64 idle;
 
-	idle = kcpustat_cpu(cpu).cpustat[CPUTIME_IDLE];
+	idle = kcs->cpustat[CPUTIME_IDLE];
 	if (cpu_online(cpu) && !nr_iowait_cpu(cpu))
 		idle += arch_idle_time(cpu);
 	return idle;
@@ -68,7 +68,7 @@ static u64 get_iowait_time(int cpu)
 
 #else
 
-static u64 get_idle_time(int cpu)
+u64 get_idle_time(struct kernel_cpustat *kcs, int cpu)
 {
 	u64 idle, idle_usecs = -1ULL;
 
@@ -77,7 +77,7 @@ static u64 get_idle_time(int cpu)
 
 	if (idle_usecs == -1ULL)
 		/* !NO_HZ or cpu offline so we can rely on cpustat.idle */
-		idle = kcpustat_cpu(cpu).cpustat[CPUTIME_IDLE];
+		idle = kcs->cpustat[CPUTIME_IDLE];
 	else
 		idle = idle_usecs * NSEC_PER_USEC;
 
@@ -120,7 +120,7 @@ static void get_all_cpustat(struct kernel_cpustat *cpu_stat)
 		cpu_stat->cpustat[CPUTIME_SYSTEM] +=
 			kcpustat_cpu(cpu).cpustat[CPUTIME_SYSTEM];
 		cpu_stat->cpustat[CPUTIME_IDLE] +=
-			get_idle_time(cpu);
+			get_idle_time(&kcpustat_cpu(cpu), cpu);
 		cpu_stat->cpustat[CPUTIME_IOWAIT] +=
 			get_iowait_time(cpu);
 		cpu_stat->cpustat[CPUTIME_IRQ] +=
