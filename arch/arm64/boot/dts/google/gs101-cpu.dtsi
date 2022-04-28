@@ -497,6 +497,7 @@
 			#cooling-cells = <2>; /* min followed by max */
 			ect-coeff-index = <2>;
 			tz-cooling-name = "LITTLE";
+			max-dfs-count = <0>;
 			skip-boot-pmqos;
 			use-em-coeff;
 
@@ -517,6 +518,7 @@
 			#cooling-cells = <2>; /* min followed by max */
 			ect-coeff-index = <1>;
 			tz-cooling-name = "MID";
+			max-dfs-count = <2>;
 			skip-boot-pmqos;
 			use-em-coeff;
 
@@ -537,6 +539,7 @@
 			#cooling-cells = <2>; /* min followed by max */
 			ect-coeff-index = <0>;
 			tz-cooling-name = "BIG";
+			max-dfs-count = <2>;
 			skip-boot-pmqos;
 			use-em-coeff;
 
