@@ -1805,13 +1805,7 @@ static int __dwc3_gadget_start_isoc(struct dwc3_ep *dep)
 	}
 
 	for (i = 0; i < DWC3_ISOC_MAX_RETRIES; i++) {
-		int future_interval = i + 1;
-
-		/* Give the controller at least 500us to schedule transfers */
-		if (desc->bInterval < 3)
-			future_interval += 3 - desc->bInterval;
-
-		dep->frame_number = DWC3_ALIGN_FRAME(dep, future_interval);
+		dep->frame_number = DWC3_ALIGN_FRAME(dep, i + 1);
 
 		ret = __dwc3_gadget_kick_transfer(dep);
 		if (ret != -EAGAIN)
