@@ -1954,10 +1954,10 @@ static void dwc3_gadget_ep_skip_trbs(struct dwc3_ep *dep, struct dwc3_request *r
 static void dwc3_gadget_ep_cleanup_cancelled_requests(struct dwc3_ep *dep)
 {
 	struct dwc3_request		*req;
+	struct dwc3_request		*tmp;
 	struct dwc3			*dwc = dep->dwc;
 
-	while (!list_empty(&dep->cancelled_list)) {
-		req = next_request(&dep->cancelled_list);
+	list_for_each_entry_safe(req, tmp, &dep->cancelled_list, list) {
 		dwc3_gadget_ep_skip_trbs(dep, req);
 		switch (req->status) {
 		case DWC3_REQUEST_STATUS_DISCONNECTED:
@@ -1974,12 +1974,6 @@ static void dwc3_gadget_ep_cleanup_cancelled_requests(struct dwc3_ep *dep)
 			dwc3_gadget_giveback(dep, req, -ECONNRESET);
 			break;
 		}
-		/*
-		 * The endpoint is disabled, let the dwc3_remove_requests()
-		 * handle the cleanup.
-		 */
-		if (!dep->endpoint.desc)
-			break;
 	}
 }
 
@@ -3270,20 +3264,14 @@ static void dwc3_gadget_ep_cleanup_completed_requests(struct dwc3_ep *dep,
 		const struct dwc3_event_depevt *event, int status)
 {
 	struct dwc3_request	*req;
+	struct dwc3_request	*tmp;
 
-	while (!list_empty(&dep->started_list)) {
+	list_for_each_entry_safe(req, tmp, &dep->started_list, list) {
 		int ret;
 
-		req = next_request(&dep->started_list);
 		ret = dwc3_gadget_ep_cleanup_completed_request(dep, event,
 				req, status);
 		if (ret)
-			break;
-		/*
-		 * The endpoint is disabled, let the dwc3_remove_requests()
-		 * handle the cleanup.
-		 */
-		if (!dep->endpoint.desc)
 			break;
 	}
 }
