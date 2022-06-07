@@ -43,6 +43,7 @@
   atomic_notifier_chain_unregister
   autoremove_wake_function
   available_idle_cpu
+  backlight_device_set_brightness
   bcmp
   bdget_disk
   bdput
@@ -1215,6 +1216,7 @@
   of_dma_controller_register
   of_drm_find_bridge
   of_drm_find_panel
+  of_find_backlight_by_node
   of_find_compatible_node
   of_find_device_by_node
   of_find_i2c_adapter_by_node
@@ -1634,6 +1636,7 @@
   set_page_dirty
   set_page_dirty_lock
   __SetPageMovable
+  set_user_nice
   sg_alloc_table
   sg_alloc_table_from_pages
   sg_free_table
@@ -1751,6 +1754,7 @@
   snd_soc_runtime_set_dai_fmt
   snd_soc_unregister_card
   snd_soc_unregister_component
+  snd_vendor_set_ops
   snprintf
   soc_device_register
   __sock_create
