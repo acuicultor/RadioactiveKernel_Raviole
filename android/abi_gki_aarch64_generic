@@ -702,6 +702,7 @@
   dw_pcie_write
   __dynamic_dev_dbg
   __dynamic_pr_debug
+  em_cpu_get
   emergency_restart
   enable_irq
   enable_percpu_irq
@@ -731,6 +732,7 @@
   filp_open_block
   find_extend_vma
   find_get_pid
+  find_last_bit
   find_next_bit
   find_next_zero_bit
   find_task_by_vpid
@@ -1685,6 +1687,7 @@
   skb_queue_tail
   skb_realloc_headroom
   skb_trim
+  skip_spaces
   smp_call_function
   smp_call_function_single
   smp_call_on_cpu
