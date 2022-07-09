@@ -22,8 +22,8 @@ DECLARE_PER_CPU(struct uclamp_stats, uclamp_stats);
 #endif
 
 unsigned int __read_mostly vendor_sched_uclamp_threshold;
-unsigned int __read_mostly vendor_sched_high_capacity_start_cpu = MAX_CAPACITY_CPU;
 unsigned int __read_mostly vendor_sched_util_post_init_scale = DEF_UTIL_POST_INIT_SCALE;
+bool __read_mostly vendor_sched_npi_packing = true; //non prefer idle packing
 static struct kobject *vendor_sched_kobj;
 static struct proc_dir_entry *vendor_sched;
 extern unsigned int sched_capacity_margin[CPU_NUM];
@@ -37,17 +37,30 @@ extern struct vendor_group_property *get_vendor_group_property(enum vendor_group
 static void apply_uclamp_change(enum vendor_group group, enum uclamp_id clamp_id);
 
 static struct uclamp_se uclamp_default[UCLAMP_CNT];
+unsigned int pmu_poll_time_ms = 10;
+bool pmu_poll_enabled;
+extern void pmu_poll_enable(void);
+extern void pmu_poll_disable(void);
 
-#define SET_TASK_GROUP_STORE(__grp, __vg)						      \
+#define SET_VENDOR_GROUP_STORE(__grp, __vg)						      \
 		static ssize_t set_task_group_##__grp##_store (struct kobject *kobj,	      \
 							       struct kobj_attribute *attr,   \
 							       const char *buf, size_t count) \
 		{									      \
-			int ret = update_vendor_task_attribute(buf, VTA_GROUP, __vg);	      \
+			int ret = update_vendor_group_attribute(buf, VTA_TASK_GROUP, __vg);   \
 			return ret ?: count;						      \
 		}									      \
 		static struct kobj_attribute set_task_group_##__grp##_attribute =	      \
-							__ATTR_WO(set_task_group_##__grp);
+							__ATTR_WO(set_task_group_##__grp);    \
+		static ssize_t set_proc_group_##__grp##_store (struct kobject *kobj,	      \
+							       struct kobj_attribute *attr,   \
+							       const char *buf, size_t count) \
+		{									      \
+			int ret = update_vendor_group_attribute(buf, VTA_PROC_GROUP, __vg);   \
+			return ret ?: count;						      \
+		}									      \
+		static struct kobj_attribute set_proc_group_##__grp##_attribute =	      \
+							__ATTR_WO(set_proc_group_##__grp);
 
 
 #define VENDOR_GROUP_BOOL_ATTRIBUTE(__grp, __attr, __vg)				      \
@@ -55,7 +68,7 @@ static struct uclamp_se uclamp_default[UCLAMP_CNT];
 						       struct kobj_attribute *attr,char *buf) \
 		{									      \
 			struct vendor_group_property *gp = get_vendor_group_property(__vg);   \
-			return scnprintf(buf, PAGE_SIZE, "%s\n",			\
+			return scnprintf(buf, PAGE_SIZE, "%s\n",			      \
 					gp->__attr==true? "true":"false");		      \
 		}									      \
 		static ssize_t __grp##_##__attr##_store (struct kobject *kobj,		      \
@@ -77,13 +90,13 @@ static struct uclamp_se uclamp_default[UCLAMP_CNT];
 						       struct kobj_attribute *attr,char *buf) \
 		{									      \
 			struct vendor_group_property *gp = get_vendor_group_property(__vg);   \
-			return scnprintf(buf, PAGE_SIZE, "%u\n",	gp->__attr);	\
+			return scnprintf(buf, PAGE_SIZE, "%u\n",	gp->__attr);	      \
 		}									      \
 		static ssize_t __grp##_##__attr##_store (struct kobject *kobj,		      \
 							 struct kobj_attribute *attr,	      \
 							 const char *buf, size_t count)	      \
 		{									      \
-			unsigned int val;					\
+			unsigned int val;					              \
 			struct vendor_group_property *gp = get_vendor_group_property(__vg);   \
 			if (kstrtouint(buf, 10, &val))					      \
 				return -EINVAL;						      \
@@ -193,12 +206,12 @@ VENDOR_GROUP_UINT_ATTRIBUTE(dex2oat, group_throttle, VG_DEX2OAT);
 VENDOR_GROUP_UCLAMP_ATTRIBUTE(dex2oat, uclamp_min, VG_DEX2OAT, UCLAMP_MIN);
 VENDOR_GROUP_UCLAMP_ATTRIBUTE(dex2oat, uclamp_max, VG_DEX2OAT, UCLAMP_MAX);
 
-VENDOR_GROUP_BOOL_ATTRIBUTE(ota, prefer_idle, VG_DEX2OAT);
-VENDOR_GROUP_BOOL_ATTRIBUTE(ota, prefer_high_cap, VG_DEX2OAT);
-VENDOR_GROUP_BOOL_ATTRIBUTE(ota, task_spreading, VG_DEX2OAT);
-VENDOR_GROUP_UINT_ATTRIBUTE(ota, group_throttle, VG_DEX2OAT);
-VENDOR_GROUP_UCLAMP_ATTRIBUTE(ota, uclamp_min, VG_DEX2OAT, UCLAMP_MIN);
-VENDOR_GROUP_UCLAMP_ATTRIBUTE(ota, uclamp_max, VG_DEX2OAT, UCLAMP_MAX);
+VENDOR_GROUP_BOOL_ATTRIBUTE(ota, prefer_idle, VG_OTA);
+VENDOR_GROUP_BOOL_ATTRIBUTE(ota, prefer_high_cap, VG_OTA);
+VENDOR_GROUP_BOOL_ATTRIBUTE(ota, task_spreading, VG_OTA);
+VENDOR_GROUP_UINT_ATTRIBUTE(ota, group_throttle, VG_OTA);
+VENDOR_GROUP_UCLAMP_ATTRIBUTE(ota, uclamp_min, VG_OTA, UCLAMP_MIN);
+VENDOR_GROUP_UCLAMP_ATTRIBUTE(ota, uclamp_max, VG_OTA, UCLAMP_MAX);
 
 VENDOR_GROUP_BOOL_ATTRIBUTE(sf, prefer_idle, VG_SF);
 VENDOR_GROUP_BOOL_ATTRIBUTE(sf, prefer_high_cap, VG_SF);
@@ -547,14 +560,14 @@ static void apply_uclamp_change(enum vendor_group group, enum uclamp_id clamp_id
 	rcu_read_unlock();
 }
 
-static int update_vendor_task_attribute(const char *buf,
-					enum vendor_task_attribute vta, unsigned int val)
+static int update_vendor_group_attribute(const char *buf, enum vendor_group_attribute vta,
+					 unsigned int val)
 {
 	struct vendor_task_struct *vp;
-	struct task_struct *p;
+	struct task_struct *p, *t;
 	enum uclamp_id clamp_id;
-
 	pid_t pid;
+	const struct cred *cred, *tcred;
 
 	if (kstrtoint(buf, 0, &pid) || pid <= 0)
 		return -EINVAL;
@@ -567,36 +580,58 @@ static int update_vendor_task_attribute(const char *buf,
 	}
 
 	get_task_struct(p);
-	vp = get_vendor_task_struct(p);
+
+	cred = current_cred();
+	tcred = get_task_cred(p);
+	if (!uid_eq(cred->euid, GLOBAL_ROOT_UID) &&
+	    !uid_eq(cred->euid, tcred->uid) &&
+	    !uid_eq(cred->euid, tcred->suid) &&
+	    !ns_capable(tcred->user_ns, CAP_SYS_NICE)) {
+		put_cred(tcred);
+		put_task_struct(p);
+		rcu_read_unlock();
+		return -EACCES;
+	}
+	put_cred(tcred);
 
 	switch (vta) {
-	case VTA_GROUP:
+	case VTA_TASK_GROUP:
+		vp = get_vendor_task_struct(p);
 		vp->group = val;
 		for (clamp_id = 0; clamp_id < UCLAMP_CNT; clamp_id++)
 			uclamp_update_active(p, clamp_id);
 		break;
+	case VTA_PROC_GROUP:
+		for_each_thread(p, t) {
+			vp = get_vendor_task_struct(t);
+			vp->group = val;
+			for (clamp_id = 0; clamp_id < UCLAMP_CNT; clamp_id++)
+				uclamp_update_active(t, clamp_id);
+		}
+		break;
 	default:
 		break;
 	}
-	rcu_read_unlock();
 
 	put_task_struct(p);
+	rcu_read_unlock();
 
 	return 0;
 }
 
-SET_TASK_GROUP_STORE(ta, VG_TOPAPP);
-SET_TASK_GROUP_STORE(fg, VG_FOREGROUND);
-SET_TASK_GROUP_STORE(sys, VG_SYSTEM);
-SET_TASK_GROUP_STORE(cam, VG_CAMERA);
-SET_TASK_GROUP_STORE(cam_power, VG_CAMERA_POWER);
-SET_TASK_GROUP_STORE(bg, VG_BACKGROUND);
-SET_TASK_GROUP_STORE(sysbg, VG_SYSTEM_BACKGROUND);
-SET_TASK_GROUP_STORE(nnapi, VG_NNAPI_HAL);
-SET_TASK_GROUP_STORE(rt, VG_RT);
-SET_TASK_GROUP_STORE(dex2oat, VG_DEX2OAT);
-SET_TASK_GROUP_STORE(ota, VG_OTA);
-SET_TASK_GROUP_STORE(sf, VG_SF);
+SET_VENDOR_GROUP_STORE(ta, VG_TOPAPP);
+SET_VENDOR_GROUP_STORE(fg, VG_FOREGROUND);
+// VG_SYSTEM is default setting so set to VG_SYSTEM is essentially clear vendor group
+SET_VENDOR_GROUP_STORE(sys, VG_SYSTEM);
+SET_VENDOR_GROUP_STORE(cam, VG_CAMERA);
+SET_VENDOR_GROUP_STORE(cam_power, VG_CAMERA_POWER);
+SET_VENDOR_GROUP_STORE(bg, VG_BACKGROUND);
+SET_VENDOR_GROUP_STORE(sysbg, VG_SYSTEM_BACKGROUND);
+SET_VENDOR_GROUP_STORE(nnapi, VG_NNAPI_HAL);
+SET_VENDOR_GROUP_STORE(rt, VG_RT);
+SET_VENDOR_GROUP_STORE(dex2oat, VG_DEX2OAT);
+SET_VENDOR_GROUP_STORE(ota, VG_OTA);
+SET_VENDOR_GROUP_STORE(sf, VG_SF);
 
 static const char *GRP_NAME[VG_MAX] = {"sys", "ta", "fg", "cam", "cam_power", "bg", "sys_bg",
 				       "nnapi", "rt", "dex2oat", "ota", "sf"};
@@ -634,16 +669,6 @@ static int dump_task_show(struct seq_file *m, void *v)
 
 	return 0;
 }
-
-static ssize_t clear_group_store(struct kobject *kobj,
-				 struct kobj_attribute *attr,
-				 const char *buf, size_t count)
-{
-	int ret = update_vendor_task_attribute(buf, VTA_GROUP, VG_SYSTEM);
-
-	return ret ?: count;
-}
-static struct kobj_attribute clear_group_attribute = __ATTR_WO(clear_group);
 
 static ssize_t uclamp_threshold_show(struct kobject *kobj,
 					struct kobj_attribute *attr,
@@ -694,6 +719,29 @@ static ssize_t util_threshold_store(struct kobject *kobj,
 }
 
 static struct kobj_attribute util_threshold_attribute = __ATTR_RW(util_threshold);
+
+static ssize_t npi_packing_show(struct kobject *kobj,
+				struct kobj_attribute *attr,
+				char *buf)
+{
+	return sysfs_emit(buf, "%s\n", vendor_sched_npi_packing ? "true" : "false");
+}
+
+static ssize_t npi_packing_store(struct kobject *kobj,
+				 struct kobj_attribute *attr,
+				 const char *buf, size_t count)
+{
+	bool enable;
+
+	if (kstrtobool(buf, &enable))
+		return -EINVAL;
+
+	vendor_sched_npi_packing = enable;
+
+	return count;
+}
+
+static struct kobj_attribute npi_packing_attribute = __ATTR_RW(npi_packing);
 
 #if IS_ENABLED(CONFIG_UCLAMP_STATS)
 static ssize_t uclamp_stats_show(struct kobject *kobj, struct kobj_attribute *attr, char *buf)
@@ -835,33 +883,6 @@ static ssize_t reset_uclamp_stats_store(struct kobject *kobj, struct kobj_attrib
 static struct kobj_attribute reset_uclamp_stats_attribute = __ATTR_WO(reset_uclamp_stats);
 #endif
 
-
-static ssize_t high_capacity_start_cpu_show(struct kobject *kobj,
-					struct kobj_attribute *attr,
-					char *buf)
-{
-	return snprintf(buf, PAGE_SIZE, "%d\n", vendor_sched_high_capacity_start_cpu);
-}
-
-static ssize_t high_capacity_start_cpu_store(struct kobject *kobj,
-					struct kobj_attribute *attr,
-					const char *buf, size_t count)
-{
-	unsigned int val;
-
-	if (kstrtouint(buf, 0, &val))
-		return -EINVAL;
-
-	if (val != MID_CAPACITY_CPU && val != MAX_CAPACITY_CPU)
-		return -EINVAL;
-
-	vendor_sched_high_capacity_start_cpu = val;
-
-	return count;
-}
-
-static struct kobj_attribute high_capacity_start_cpu_attribute = __ATTR_RW(high_capacity_start_cpu);
-
 static ssize_t util_post_init_scale_show(struct kobject *kobj,
 					struct kobj_attribute *attr,
 					char *buf)
@@ -887,6 +908,61 @@ static ssize_t util_post_init_scale_store(struct kobject *kobj,
 }
 
 static struct kobj_attribute util_post_init_scale_attribute = __ATTR_RW(util_post_init_scale);
+
+static ssize_t pmu_poll_time_show(struct kobject *kobj,
+					struct kobj_attribute *attr,
+					char *buf)
+{
+	return sysfs_emit(buf, "%u\n", pmu_poll_time_ms);
+}
+
+static ssize_t pmu_poll_time_store(struct kobject *kobj,
+					struct kobj_attribute *attr,
+					const char *buf, size_t count)
+{
+	unsigned int val;
+
+	if (kstrtouint(buf, 0, &val))
+		return -EINVAL;
+
+	if (val < 10 || val > 1000000)
+		return -EINVAL;
+
+	pmu_poll_time_ms = val;
+
+	return count;
+}
+
+static struct kobj_attribute pmu_poll_time_attribute = __ATTR_RW(pmu_poll_time);
+
+static ssize_t pmu_poll_enable_show(struct kobject *kobj,
+					struct kobj_attribute *attr,
+					char *buf)
+{
+	return sysfs_emit(buf, "%s\n", pmu_poll_enabled ? "true" : "false");
+}
+
+static ssize_t pmu_poll_enable_store(struct kobject *kobj,
+					struct kobj_attribute *attr,
+					const char *buf, size_t count)
+{
+	bool enable;
+
+	if (kstrtobool(buf, &enable))
+		return -EINVAL;
+
+	if (pmu_poll_enabled == enable)
+		return count;
+
+	if (enable)
+		pmu_poll_enable();
+	else
+		pmu_poll_disable();
+
+	return count;
+}
+
+static struct kobj_attribute pmu_poll_enable_attribute = __ATTR_RW(pmu_poll_enable);
 
 static ssize_t uclamp_fork_reset_set_store(struct kobject *kobj,
 					      struct kobj_attribute *attr,
@@ -1024,7 +1100,7 @@ static struct attribute *attrs[] = {
 	&sf_group_throttle_attribute.attr,
 	&sf_uclamp_min_attribute.attr,
 	&sf_uclamp_max_attribute.attr,
-	// Vendor task attributes
+	// Vendor group attributes
 	&set_task_group_ta_attribute.attr,
 	&set_task_group_fg_attribute.attr,
 	&set_task_group_sys_attribute.attr,
@@ -1037,7 +1113,18 @@ static struct attribute *attrs[] = {
 	&set_task_group_dex2oat_attribute.attr,
 	&set_task_group_ota_attribute.attr,
 	&set_task_group_sf_attribute.attr,
-	&clear_group_attribute.attr,
+	&set_proc_group_ta_attribute.attr,
+	&set_proc_group_fg_attribute.attr,
+	&set_proc_group_sys_attribute.attr,
+	&set_proc_group_cam_attribute.attr,
+	&set_proc_group_cam_power_attribute.attr,
+	&set_proc_group_bg_attribute.attr,
+	&set_proc_group_sysbg_attribute.attr,
+	&set_proc_group_nnapi_attribute.attr,
+	&set_proc_group_rt_attribute.attr,
+	&set_proc_group_dex2oat_attribute.attr,
+	&set_proc_group_ota_attribute.attr,
+	&set_proc_group_sf_attribute.attr,
 	// Uclamp stats
 #if IS_ENABLED(CONFIG_UCLAMP_STATS)
 	&uclamp_stats_attribute.attr,
@@ -1047,10 +1134,14 @@ static struct attribute *attrs[] = {
 #endif
 	&uclamp_threshold_attribute.attr,
 	&util_threshold_attribute.attr,
-	&high_capacity_start_cpu_attribute.attr,
 	&util_post_init_scale_attribute.attr,
 	&uclamp_fork_reset_set_attribute.attr,
 	&uclamp_fork_reset_clear_attribute.attr,
+	&npi_packing_attribute.attr,
+
+	&pmu_poll_time_attribute.attr,
+	&pmu_poll_enable_attribute.attr,
+
 	NULL,
 };
 
