@@ -701,7 +701,6 @@
   dw_pcie_write
   __dynamic_dev_dbg
   __dynamic_pr_debug
-  em_cpu_get
   emergency_restart
   enable_irq
   enable_percpu_irq
@@ -1689,7 +1688,6 @@
   skb_queue_tail
   skb_realloc_headroom
   skb_trim
-  skip_spaces
   smp_call_function
   smp_call_function_single
   smp_call_on_cpu
@@ -2295,6 +2293,8 @@
 
 # preserved by --additions-only
   cpumask_next_wrap
+  em_cpu_get
+  skip_spaces
   __traceiter_android_rvh_find_energy_efficient_cpu
   __tracepoint_android_rvh_find_energy_efficient_cpu
   __update_load_avg_blocked_se
