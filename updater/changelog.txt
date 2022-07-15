@@ -1,11 +1,15 @@
-Project name: RadioactiveKernel_Raviole-v1.2.1
+Project name: RadioactiveKernel_Raviole-v1.2.2
   * update build version (acuicultor)
-  * add PMU frequency limiter
-  * drivers: thermal: Using PDs from pixel-em.
-  * soc: google: pixel-em: Custom Energy Model driver. 
-  * bfq update
-  * arm64/dts: gs101: Set floor GPU freq to 150mhz 
-  * TCP optimization
-  * cpufreq: setup Energy Model from DT opp-microwatt
-  * merge JULY 2022 12L source
+  * Revert "dma-buf/sync_file: Remove debug names from sync data structures" (acuicultor) [33c545d9cb84]
+  * gki: abi update (acuicultor) [8b26566e93e0]
+  * drivers: soc: google: pixel-em: build into zImage (freak07) [a7fc383c0173]
+  * drivers: soc: google: pixel-em: prepare to build into zImage otherwise selinux will get scrambled (freak07) [b2ae208effde]
+  * ANDROID: trusty: Use high priority check WQ and regular nop WQ (Tri Vo) [e19f5cb0f5cf]
+  * arm64/configs: slider: enable boot_control (Jidong Sun) [dca031ca4b40]
+  * boot_control: export sysfs interface (Jidong Sun) [4faf0b4faf2d]
+  * sched/fair: Add cfs bandwidth burst statistics (Huaixin Chang) [845510b4182e]
+  * sched/fair: Introduce the burstable CFS controller (Huaixin Chang) [1214011fa770]
+  * sched/fair: Merge select_idle_core/cpu() (Mel Gorman) [c8c6660548be]
+  * sched/fair: Move avg_scan_cost calculations under SIS_PROP (Mel Gorman) [347b635cc16d]
+  * sched/fair: Remove SIS_AVG_CPU (Mel Gorman) [03877f2e6ab9]
 
