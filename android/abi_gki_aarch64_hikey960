@@ -175,7 +175,6 @@
   irq_of_parse_and_map
   irq_set_irq_wake
   jiffies
-  kasan_flag_enabled
   kfree
   kfree_const
   kfree_skb
