@@ -133,7 +133,6 @@
   iounmap
   jiffies
   jiffies_to_msecs
-  kasan_flag_enabled
   kfree
   kfree_skb
   kimage_voffset
