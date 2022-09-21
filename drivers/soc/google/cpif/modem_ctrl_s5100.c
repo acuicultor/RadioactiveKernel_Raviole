@@ -50,7 +50,7 @@ static int s5100_lcd_notifier(struct notifier_block *notifier,
 
 #define msecs_to_loops(t) (loops_per_jiffy / 1000 * HZ * t)
 
-#define RUNTIME_PM_AFFINITY_CORE 2
+#define RUNTIME_PM_AFFINITY_CORE 0
 
 static struct modem_ctl *g_mc;
 
