@@ -259,12 +259,6 @@ static irqreturn_t ap_wakeup_handler(int irq, void *data)
 
 	spin_lock_irqsave(&mc->pcie_pm_lock, flags);
 	if (mc->pcie_pm_suspended) {
-		if (gpio_val == 1) {
-			/* try to block system suspend */
-			if (!cpif_wake_lock_active(mc->ws))
-				cpif_wake_lock(mc->ws);
-		}
-
 		mif_err("cp2ap_wakeup work pending. gpio_val : %d\n", gpio_val);
 		mc->pcie_pm_resume_wait = true;
 		mc->pcie_pm_resume_gpio_val = gpio_val;
