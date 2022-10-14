@@ -60,7 +60,7 @@
 			enable-method = "psci";
 			cpu-idle-states =  <&ANANKE_CPU_SLEEP>;
 			capacity-dmips-mhz = <250>;
-			dynamic-power-coefficient = <70>;
+			dynamic-power-coefficient = <69>;
 			operating-points-v2 = <&opp_table_little>;
 		};
 		cpu1: cpu@0100 {
@@ -70,7 +70,7 @@
 			enable-method = "psci";
 			cpu-idle-states =  <&ANANKE_CPU_SLEEP>;
 			capacity-dmips-mhz = <250>;
-			dynamic-power-coefficient = <70>;
+			dynamic-power-coefficient = <69>;
 			operating-points-v2 = <&opp_table_little>;
 		};
 		cpu2: cpu@0200 {
@@ -98,20 +98,20 @@
 			compatible = "arm,armv8";
 			reg = <0x0 0x0400>;
 			enable-method = "psci";
-			cpu-idle-states =  <&ENYO_CPU_SLEEP>;
-			capacity-dmips-mhz = <620>;
-			dynamic-power-coefficient = <284>;
-			operating-points-v2 = <&opp_table_mid>;
+			cpu-idle-states =  <&HERCULES_CPU_SLEEP>;
+			capacity-dmips-mhz = <927>;
+			dynamic-power-coefficient = <513>;
+            operating-points-v2 = <&opp_table_mid>;
 		};
 		cpu5: cpu@0500 {
 			device_type = "cpu";
 			compatible = "arm,armv8";
 			reg = <0x0 0x0500>;
 			enable-method = "psci";
-			cpu-idle-states =  <&ENYO_CPU_SLEEP>;
-			capacity-dmips-mhz = <620>;
-			dynamic-power-coefficient = <284>;
-			operating-points-v2 = <&opp_table_mid>;
+			cpu-idle-states =  <&HERCULES_CPU_SLEEP>;
+			capacity-dmips-mhz = <927>;
+			dynamic-power-coefficient = <513>;
+            operating-points-v2 = <&opp_table_mid>;
 		};
 		cpu6: cpu@0600 {
 			device_type = "cpu";
@@ -130,7 +130,7 @@
 			enable-method = "psci";
 			cpu-idle-states =  <&HERA_CPU_SLEEP>;
 			capacity-dmips-mhz = <1024>;
-			dynamic-power-coefficient = <650>;
+			dynamic-power-coefficient = <757>;
 			operating-points-v2 = <&opp_table_big>;
 		};
 
@@ -147,7 +147,7 @@
 				status = "okay";
 			};
 
-			ENYO_CPU_SLEEP: enyo-cpu-sleep {
+			HERCULES_CPU_SLEEP: hercules-cpu-sleep {
 				idle-state-name = "c2";
 				compatible = "arm,idle-state";
 				arm,psci-suspend-param = <0x0010000>;
@@ -511,7 +511,7 @@
 			cal-id = <ACPM_DVFS_CPUCL1>;
 			dm-type = <DM_CPU_CL1>;
 
-			max-freq = <2253000>;
+			max-freq = <2348000>;
 			min-freq = <400000>;
 			resume-freq = <1491000>;
 
@@ -571,14 +571,15 @@
 			constraint-cal-id = <ACPM_DVFS_CPUCL0>;
 
 				/* CL1    CL0 */
-			table = < 2253000	1328000
+			table = < 2348000	1328000
+				  2253000	1197000
 				  2130000	1098000
 				  1999000	1098000
 				  1836000	1098000
 				  1663000	1098000
-				  1491000	1098000
+				  1491000	930000
 				  1328000	930000
-				  1197000	930000
+				  1197000	738000
 				  1024000	738000
 				  910000	574000
 				  799000	574000
@@ -597,18 +598,18 @@
 				  2802000	1401000
 				  2704000	1401000
 				  2630000	1401000
-				  2507000	1328000
-				  2401000	1328000
-				  2252000	1197000
-				  2188000	1197000
+				  2507000	1401000
+				  2401000	1401000
+				  2252000	1328000
+				  2188000	1328000
 				  2048000	1197000
 				  1826000	1098000
 				  1745000	1098000
-				  1582000	1098000
+				  1582000	930000
 				  1426000	930000
 				  1277000	738000
 				  1106000	738000
-				  984000	574000
+				  984000	738000
 				  851000	574000
 				  500000	300000 >;
 		};
