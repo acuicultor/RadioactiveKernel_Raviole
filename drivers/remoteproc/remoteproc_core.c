@@ -2427,7 +2427,7 @@ void rproc_report_crash(struct rproc *rproc, enum rproc_crash_type type)
 		rproc->name, rproc_crash_to_string(type));
 
 	/* Have a worker handle the error; ensure system is not suspended */
-	queue_work(system_freezable_wq, &rproc->crash_handler);
+	queue_work(system_freezable_power_efficient_wq, &rproc->crash_handler);
 }
 EXPORT_SYMBOL(rproc_report_crash);
 

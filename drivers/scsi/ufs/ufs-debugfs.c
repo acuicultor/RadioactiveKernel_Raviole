@@ -123,7 +123,7 @@ void ufs_debugfs_exception_event(struct ufs_hba *hba, u16 status)
 	if (chgd && !err) {
 		unsigned long delay = msecs_to_jiffies(hba->debugfs_ee_rate_limit_ms);
 
-		queue_delayed_work(system_freezable_wq, &hba->debugfs_ee_work, delay);
+		queue_delayed_work(system_freezable_power_efficient_wq, &hba->debugfs_ee_work, delay);
 	}
 }
 

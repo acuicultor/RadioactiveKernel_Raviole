@@ -374,7 +374,7 @@ static void virtio_fs_request_dispatch_work(struct work_struct *work)
 			if (ret == -ENOMEM || ret == -ENOSPC) {
 				spin_lock(&fsvq->lock);
 				list_add_tail(&req->list, &fsvq->queued_reqs);
-				schedule_delayed_work(&fsvq->dispatch_work,
+				queue_delayed_work(system_power_efficient_wq, &fsvq->dispatch_work,
 						      msecs_to_jiffies(1));
 				spin_unlock(&fsvq->lock);
 				return;
@@ -422,7 +422,7 @@ static int send_forget_request(struct virtio_fs_vq *fsvq,
 			pr_debug("virtio-fs: Could not queue FORGET: err=%d. Will try later\n",
 				 ret);
 			list_add_tail(&forget->list, &fsvq->queued_reqs);
-			schedule_delayed_work(&fsvq->dispatch_work,
+			queue_delayed_work(system_power_efficient_wq, &fsvq->dispatch_work,
 					      msecs_to_jiffies(1));
 			if (!in_flight)
 				inc_in_flight_req(fsvq);
@@ -1257,7 +1257,7 @@ __releases(fiq->lock)
 			spin_lock(&fsvq->lock);
 			list_add_tail(&req->list, &fsvq->queued_reqs);
 			inc_in_flight_req(fsvq);
-			schedule_delayed_work(&fsvq->dispatch_work,
+			queue_delayed_work(system_power_efficient_wq, &fsvq->dispatch_work,
 						msecs_to_jiffies(1));
 			spin_unlock(&fsvq->lock);
 			return;
@@ -1268,7 +1268,7 @@ __releases(fiq->lock)
 		/* Can't end request in submission context. Use a worker */
 		spin_lock(&fsvq->lock);
 		list_add_tail(&req->list, &fsvq->end_reqs);
-		schedule_delayed_work(&fsvq->dispatch_work, 0);
+		queue_delayed_work(system_power_efficient_wq, &fsvq->dispatch_work, 0);
 		spin_unlock(&fsvq->lock);
 		return;
 	}
