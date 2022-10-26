@@ -17,6 +17,11 @@
 #include <soc/google/exynos-pmu-if.h>
 #include <soc/google/cal-if.h>
 
+#undef pr_info
+#undef pr_debug
+#define pr_info(...) do { } while (0)
+#define pr_debug(...) do { } while (0)
+
 #define EXYNOS_EINT_PEND(b, x)      ((b) + 0xA00 + (((x) >> 3) * 4))
 #define SHARED_SR0 0x80
 

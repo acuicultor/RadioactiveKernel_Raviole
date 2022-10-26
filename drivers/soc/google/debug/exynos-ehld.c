@@ -34,8 +34,8 @@
 #define ehld_info(f, str...) pr_info(str)
 #define ehld_err(f, str...) pr_err(str)
 #else
-#define ehld_info(f, str...) do { if (f == 1) pr_info(str); } while (0)
-#define ehld_err(f, str...)  do { if (f == 1) pr_err(str); } while (0)
+#define ehld_info(f, str...) do { } while (0)
+#define ehld_err(f, str...) do { } while (0)
 #endif
 
 #define MSB_MASKING		(0x0000FF0000000000)
