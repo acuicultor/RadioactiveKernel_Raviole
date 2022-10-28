@@ -124,7 +124,24 @@ static inline void dbg_snapshot_spin_func(void)
         while (1)
                 wfi();
 }
+
 #else /* CONFIG_DEBUG_SNAPSHOT */
+
+static inline bool dbg_snapshot_get_reboot_status(void)
+{
+	return 0;
+}
+
+static inline bool dbg_snapshot_get_panic_status(void)
+{
+	return 0;
+}
+
+static inline bool dbg_snapshot_get_warm_status(void)
+{
+	return 0;
+}
+
 #define dbg_snapshot_get_timestamp()		(0)
 #define dbg_snapshot_task(a, b)			do { } while (0)
 #define dbg_snapshot_work(a, b, c, d)		do { } while (0)
@@ -140,7 +157,7 @@ static inline void dbg_snapshot_spin_func(void)
 #define dbg_snapshot_hrtimer(a, b, c, d)	do { } while (0)
 #define dbg_snapshot_dm(a, b, c, d, e)		do { } while (0)
 #define dbg_snapshot_printk(...)		do { } while (0)
-#define dbg_snapshot_itmon_backup_log(a)	do { } while (0)
+#define dbg_snapshot_itmon_backup_log(...)	do { } while (0)
 #define dbg_snapshot_itmon_irq_received(a)	do { } while (0)
 
 #define dbg_snapshot_set_item_enable(a, b)	do { } while (0)
