@@ -34,6 +34,8 @@
 #include <linux/kernel.h>
 #include <linux/debugfs.h>
 #include <linux/seq_file.h>
+#include <linux/irq.h>
+#include <linux/irqdesc.h>
 
 #include <linux/uaccess.h>
 #include <linux/export.h>
@@ -41,6 +43,7 @@
 #undef CREATE_TRACE_POINT
 #include <trace/hooks/power.h>
 
+static struct pm_qos_constraints cpu_latency_constraints;
 
 /*
  * locking rule: all changes to constraints or notifiers lists
@@ -93,7 +96,7 @@ static inline int pm_qos_set_value_for_cpus(struct pm_qos_constraints *c,
 	 * Update cpumask only only for CPU_DMA_LATENCY classes
 	 */
 
-	if (c != pm_qos_array[PM_QOS_CPU_DMA_LATENCY]->constraints)
+	if (c != &cpu_latency_constraints)
 		return -EINVAL;
 
 	plist_for_each_entry(req, &c->list, node) {
@@ -293,7 +296,7 @@ EXPORT_SYMBOL_GPL(cpu_latency_qos_request_active);
 
 int pm_qos_request_for_cpu(int pm_qos_class, int cpu)
 {
-	return pm_qos_array[pm_qos_class]->constraints->target_per_cpu[cpu];
+	return cpu_latency_constraints.target_per_cpu[cpu];
 }
 EXPORT_SYMBOL(pm_qos_request_for_cpu);
 
@@ -305,7 +308,7 @@ int pm_qos_request_for_cpumask(int pm_qos_class, struct cpumask *mask)
 	int val;
 
 	spin_lock_irqsave(&pm_qos_lock, irqflags);
-	c = pm_qos_array[pm_qos_class]->constraints;
+	c = &cpu_latency_constraints;
 	val = c->default_value;
 
 	for_each_cpu(cpu, mask) {
@@ -345,7 +348,7 @@ static void pm_qos_irq_release(struct kref *ref)
 	struct pm_qos_request *req = container_of(notify,
 					struct pm_qos_request, irq_notify);
 	struct pm_qos_constraints *c =
-				pm_qos_array[req->pm_qos_class]->constraints;
+				&cpu_latency_constraints;
 
 	spin_lock_irqsave(&pm_qos_lock, flags);
 	cpumask_setall(&req->cpus_affine);
@@ -362,7 +365,7 @@ static void pm_qos_irq_notify(struct irq_affinity_notify *notify,
 	struct pm_qos_request *req = container_of(notify,
 					struct pm_qos_request, irq_notify);
 	struct pm_qos_constraints *c =
-				pm_qos_array[req->pm_qos_class]->constraints;
+				&cpu_latency_constraints;
 	struct irq_desc *desc = irq_to_desc(req->irq);
 	struct cpumask *new_affinity =
 			irq_data_get_effective_affinity_mask(&desc->irq_data);
@@ -469,7 +472,7 @@ void cpu_latency_qos_add_request(struct pm_qos_request *req, s32 value)
 			req->type = PM_QOS_REQ_ALL_CORES;
 			cpumask_setall(&req->cpus_affine);
 			pm_qos_update_target(
-				pm_qos_array[pm_qos_class]->constraints,
+				req->qos,
 				&req->node, PM_QOS_UPDATE_REQ, value);
 		}
 	}
