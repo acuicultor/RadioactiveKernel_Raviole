@@ -126,6 +126,7 @@ struct s3c64xx_spi_driver_data {
 	/* lock : lock to change sdd->state */
 	spinlock_t                      lock;
 	unsigned long                   sfr_start;
+	unsigned int			irq;
 	struct completion               xfer_completion;
 	unsigned int                    state;
 	unsigned int                    cur_mode, cur_bpw;

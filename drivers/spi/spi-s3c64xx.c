@@ -29,6 +29,8 @@
 #include <soc/google/exynos-cpupm.h>
 #endif
 
+#include <linux/spi/spi-exynos.h>
+
 static LIST_HEAD(drvdata_list);
 
 #define MAX_SPI_PORTS		22
@@ -171,6 +173,14 @@ struct s3c64xx_spi_port_config {
 	bool	high_speed;
 	bool	clk_from_cmu;
 };
+
+int spi_get_master_irq(struct spi_device *spi_slv)
+{
+	struct s3c64xx_spi_driver_data *mas = spi_master_get_devdata(spi_slv->master);
+
+	return mas->irq;
+}
+EXPORT_SYMBOL(spi_get_master_irq);
 
 static ssize_t
 spi_dbg_show(struct device *dev, struct device_attribute *attr, char *buf)
@@ -1620,6 +1630,7 @@ static int s3c64xx_spi_probe(struct platform_device *pdev)
 	sdd->cntrlr_info = sci;
 	sdd->pdev = pdev;
 	sdd->sfr_start = mem_res->start;
+	sdd->irq = irq;
 	sdd->is_probed = 0;
 	sdd->ops = NULL;
 
