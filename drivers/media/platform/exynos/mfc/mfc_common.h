@@ -190,6 +190,9 @@
 	((p->seq_hdr_mode == V4L2_MPEG_VIDEO_HEADER_MODE_JOINED_WITH_1ST_FRAME) || \
 	((IS_VP8_ENC(ctx) || IS_VP9_ENC(ctx)) && p->ivf_header_disable))
 
+#define MFC_UHD_RES		(3840 * 2160)
+#define IS_UHD_RES(ctx)		(((ctx)->crop_width * (ctx)->crop_height) == MFC_UHD_RES)
+
 /*
  levels with maximum property values
  level	Maximum frame size in MB (MB width x MB height)
