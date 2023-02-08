@@ -582,12 +582,14 @@ static inline void cpif_wake_lock_unregister(struct wakeup_source *ws)
 
 static inline void cpif_wake_lock(struct wakeup_source *ws)
 {
+	int timeout = 50;
+
 	if (ws == NULL) {
 		mif_err("wakelock fail\n");
 		return;
 	}
 
-	__pm_stay_awake(ws);
+	__pm_wakeup_event(ws, timeout);
 }
 
 static inline void cpif_wake_lock_timeout(struct wakeup_source *ws, long timeout)
