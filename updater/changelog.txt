@@ -1,16 +1,3 @@
-Project name: RadioactiveKernel_Pantah-v1.0.4
+Project name: RadioactiveKernel_Raviole-v3.0.1
   * update build version (acuicultor)
-  * gki: abi update (acuicultor) [768179ee1faf]
-  * cpuidle: teo: Introduce util-awareness (Kajetan Puchalski) [0f11c77ea48e]
-  * cpuidle: teo: Optionally skip polling states in teo_find_shallower_state() (Kajetan Puchalski) [a4ef773be5b6]
-  * cpuidle: teo: Use kerneldoc documentation in admin-guide (Rafael J. Wysocki) [0cc517e66843]
-  * cpuidle: teo: Rename two local variables in teo_select() (Rafael J. Wysocki) [57c65499133c]
-  * cpuidle: teo: Fix alternative idle state lookup (Rafael J. Wysocki) [995d86dc8f0e]
-  * cpuidle: teo: remove unneeded semicolon in teo_select() (Wan Jiabing) [b50297593208]
-  * cpuidle: teo: Rework most recent idle duration values treatment (Rafael J. Wysocki) [ad128658ce1e]
-  * cpuidle: teo: Change the main idle state selection logic (Rafael J. Wysocki) [120354cb4ed7]
-  * cpuidle: teo: Cosmetic modification of teo_select() (Rafael J. Wysocki) [197eac781fc3]
-  * cpuidle: teo: Cosmetic modifications of teo_update() (Rafael J. Wysocki) [ceaa1ab831ac]
-  * cpuidle: teo: Take negative "sleep length" values into account (Rafael J. Wysocki) [bd5b55295940]
-  * cpuidle: teo: Adjust handling of very short idle times (Rafael J. Wysocki) [27037db88fde]
-  * built on top of android-gs-pantah-5.10-android13-qpr2 Google kernel source
+  * built on top of android-gs-pantah-5.10-android13-qpr2 April's Google kernel source
