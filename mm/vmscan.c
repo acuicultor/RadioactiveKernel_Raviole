@@ -4105,21 +4105,19 @@ static void lru_gen_age_node(struct pglist_data *pgdat, struct scan_control *sc)
 		return;
 
 	/*
-	 * The main goal is to OOM kill if every generation from all memcgs is
-	 * younger than min_ttl. However, another possibility is all memcgs are
-	 * either below min or empty.
-	 */
-	if (mutex_trylock(&oom_lock)) {
-		pr_err("mglru: min_ttl unsatisfied, calling OOM killer\n");
-		lru_gen_min_ttl_unsatisfied++;
-		struct oom_control oc = {
-			.gfp_mask = sc->gfp_mask,
-		};
-
-		out_of_memory(&oc);
-
-		mutex_unlock(&oom_lock);
-	}
+     * The main goal is to OOM kill if every generation from all memcgs is
+     * younger than min_ttl. However, another possibility is all memcgs are
+     * either below min or empty.
+     */
+    if (mutex_trylock(&oom_lock)) {
+    	struct oom_control oc = {
+		   .gfp_mask = sc->gfp_mask,
+	    };
+	    pr_err("mglru: min_ttl unsatisfied, calling OOM killer\n");
+	    lru_gen_min_ttl_unsatisfied++;
+	    out_of_memory(&oc);
+	    mutex_unlock(&oom_lock);
+    }
 }
 
 /*
