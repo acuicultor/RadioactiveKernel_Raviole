@@ -1,13 +1,13 @@
 {
   "kernel": {
-    "name": "Radioactive Kernel Pantah",
-    "version": "v3.0.1",
-    "link": "https://github.com/acuicultor/RadioactiveKernel_Raviole/releases/download/v3.0.1/RadioactiveKernel_RAVIOLE_v3.0.1.zip",
+    "name": "Radioactive Kernel Raviole",
+    "version": "v3.0.2",
+    "link": "https://github.com/acuicultor/RadioactiveKernel_Raviole/releases/download/v3.0.2/RadioactiveKernel_RAVIOLE_v3.0.2.zip",
     "changelog_url": "https://raw.githubusercontent.com/acuicultor/RadioactiveKernel_Raviole/release-unified/updater/changelog.txt",
-    "date": "2023-04-16",
-    "sha1": "bd8655ebe09664fccf45e1b5c05b6ebe70ea0cd2"
+    "date": "2023-05-03",
+    "sha1": "7f270aa855f67c540c6edd3c312c91d2eb5a3ac5"
   },
   "support": {
-    "link": "https://forum.xda-developers.com/t/kernel-radioactive-kernel-v1-0-0-a13-stable-2023-01-19-unified-pixel7-pixel7pro.4543551/"           
+    "link": "https://forum.xda-developers.com/t/kernel-radioactive-kernel-v3-0-1-a13-stable-2023-04-16-unified-pixel6-pixel6pro.4375933/"           
   }
 }
