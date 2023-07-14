@@ -866,6 +866,7 @@
   find_pid_ns
   find_task_by_vpid
   find_vma
+  find_vm_area
   find_vpid
   finish_wait
   firmware_request_nowarn
@@ -1632,6 +1633,7 @@
   pm_runtime_forbid
   pm_runtime_force_resume
   pm_runtime_force_suspend
+  pm_runtime_get_if_active
   __pm_runtime_idle
   pm_runtime_irq_safe
   __pm_runtime_resume
