@@ -1,8 +1,6 @@
-Project name: RadioactiveKernel_Raviole-v3.0.2
+Project name: RadioactiveKernel_Raviole-v3.0.4
   * update build version (acuicultor)
-  * defconfig regenerate (acuicultor) [14b79b03837e]
-  * block: make ssg default if bfq isn't compiled and adjust defaults (acuicultor) [87ebcd0a30ed]
-  * block: ssg: merge version S908BXXU3CWAI (engstk) [ffd02c263822]
-  * gki: update abi (acuicultor) [53626c8ac4b8]
-  * drivers: misc: power: implement usb fast charge mode (engstk) [6552da449e6b]
-  * built on top of android-gs-raviole-5.10-android13-qpr2 May's Google kernel source
+  * fingerprint: goodix_pixel: Add a slimmed down rewritten Goodix FP driver (Jebaitedneko) [69433e3498fa]
+  * cpufreq: battery saver: camera app exceptions switches (tbalden) [d8ee6703bc1b]
+  * treewide: fix errors caught by clang (acuicultor) [3fee8490191f]
+  * Merge remote-tracking branch 'aosp/android-gs-raviole-5.10-android13-qpr3' into release-unified (acuicultor)
