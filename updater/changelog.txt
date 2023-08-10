@@ -1,6 +1,3 @@
-Project name: RadioactiveKernel_Raviole-v3.0.4
+Project name: RadioactiveKernel_Raviole-v3.0.5
   * update build version (acuicultor)
-  * fingerprint: goodix_pixel: Add a slimmed down rewritten Goodix FP driver (Jebaitedneko) [69433e3498fa]
-  * cpufreq: battery saver: camera app exceptions switches (tbalden) [d8ee6703bc1b]
-  * treewide: fix errors caught by clang (acuicultor) [3fee8490191f]
   * Merge remote-tracking branch 'aosp/android-gs-raviole-5.10-android13-qpr3' into release-unified (acuicultor)
